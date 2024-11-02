@@ -1,68 +1,86 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <list>
-#include "Coordenada.h"
-#include "Grafo.h"
-
-void abrirArchivo(const std::string& nombreArchivo);
-
-int main() {
-    std::string nombreArchivo;
-
-    std::cout << "¡Bienvenido a nuestro taller número 4!" << std::endl;
-    std::cout << "Ingrese el nombre del archivo: ";
-    std::cin >> nombreArchivo;
-
-    abrirArchivo(nombreArchivo);
-
-    return 0;
-}
-
-void abrirArchivo(const std::string& nombreArchivo) {
-    std::ifstream archivo(nombreArchivo);
+     #include <iostream>
+    #include <fstream>
+    #include <string>
+    #include <vector>
+    #include <list>
+    #include <cmath> 
+    #include "GrafoML.h"
+    #include "Coordenada.h"
     
-    if (!archivo.is_open()) {
-        std::cerr << "No fue posible abrir el archivo" << std::endl;
-        return;
-    } else {
-        std::cout << "El archivo se abrió con éxito" << std::endl;
+    void recuperarDatos(const std::string& nombreArchivoEntrada, std::vector<GrafoML<Coordenada, double>>& grafos);
+    double calcularDistanciaEuclidiana(const Coordenada& c1, const Coordenada& c2);
+    
+    int main(int argc, char* argv[]) {
+        if (argc != 3) {
+            std::cerr << "Uso: " << argv[0] << " archivo_entrada.txt archivo_salida.txt" << std::endl;
+            return 1;
+        }
+    
+        std::string nombreArchivoEntrada = argv[1];
+        std::string nombreArchivoSalida = argv[2];
+    
+        // Vector de grafos para almacenar los datos
+        std::vector<GrafoML<Coordenada, double>> grafos;
+    
+        recuperarDatos(nombreArchivoEntrada, grafos);
+        
+        for(int=0; i<grafos.size();i++){
+            grafos[i].imprimir();
+        }
+    
+        return 0;
     }
-
-    int n; // Número de circuitos
-    archivo >> n;
-    std::vector<std::list<Coordenada>> circuitos(n);
-    std::vector<Grafo> grafos; // Vector para almacenar los grafos
-
-    for (int i = 0; i < n; ++i) {
-        int m; // Número de agujeros para el circuito i
-        archivo >> m;
-
-        grafos.emplace_back(m); // Crear un grafo para el circuito
-
-        for (int j = 0; j < m; ++j) {
-            double x, y; // Coordenadas del agujero
-            archivo >> x; // Leer el primer argumento
-            archivo >> y; // Leer el segundo argumento
-            circuitos[i].push_back(Coordenada(x, y)); // Almacenar las coordenadas en la lista
-
-            // Conectar este agujero a todos los demás (en un grafo completo)
-            for (int k = 0; k < j; ++k) {
-                grafos[i].agregarArista(j, k);
+    
+    void recuperarDatos(const std::string& nombreArchivoEntrada, std::vector<GrafoML<Coordenada, double>>& grafos) {
+        std::ifstream archivoEntrada(nombreArchivoEntrada);
+    
+        if (!archivoEntrada.is_open()) {
+            std::cerr << "No fue posible abrir el archivo de entrada" << std::endl;
+            return;
+        } else {
+            std::cout << "El archivo de entrada se abrió con éxito" << std::endl;
+        }
+    
+        int numCircuitos;
+        archivoEntrada >> numCircuitos;
+        grafos.resize(numCircuitos);
+    
+        for (int i = 0; i < numCircuitos; ++i) {
+            int numAgujeros;
+            archivoEntrada >> numAgujeros;
+    
+            GrafoML<Coordenada, double> grafo;
+    
+            // Vector temporal para almacenar coordenadas del circuito actual
+            std::vector<Coordenada> agujeros;
+    
+            for (int j = 0; j < numAgujeros; ++j) {
+                double x, y;
+                archivoEntrada >> x >> y;
+                Coordenada coord(x, y);
+    
+                agujeros.push_back(coord);
+                grafo.insertarVertice(coord);  // Insertar Coordenada como vértice
             }
+    
+            // Crear las aristas para el grafo
+            for (int k = 0; k < numAgujeros; ++k) {
+                for (int l = k + 1; l < numAgujeros; ++l) {
+                    double costo = calcularDistanciaEuclidiana(agujeros[k], agujeros[l]);
+                    grafo.insertarAristaNoDirigida(agujeros[k], agujeros[l], costo);  // Usar coordenadas como vértices
+                }
+            }
+    
+    
+            grafos[i] = grafo;
         }
+    
+        archivoEntrada.close();
+        std::cout << "Datos cargados exitosamente." << std::endl;
     }
-
-    // Mostrar los datos leídos y los grafos
-    for (int i = 0; i < n; ++i) {
-        std::cout << "Circuito " << (i + 1) << ": " << circuitos[i].size() << " agujeros\n";
-        for (const Coordenada& agujero : circuitos[i]) { // Usar tipo explícito
-            std::cout << "Agujero: (" << agujero.obtenerX() << ", " << agujero.obtenerY() << ")\n"; // Imprimir directamente
-        }
-        std::cout << "Grafo del circuito " << (i + 1) << ":\n";
-        grafos[i].mostrarGrafo(); // Mostrar el grafo
+    
+    double calcularDistanciaEuclidiana(const Coordenada& c1, const Coordenada& c2) {
+        double deltaX = c1.obtenerX() - c2.obtenerX();
+        double deltaY = c1.obtenerY() - c2.obtenerY();
+        return std::sqrt(deltaX * deltaX + deltaY * deltaY);
     }
-
-    archivo.close();
-}
