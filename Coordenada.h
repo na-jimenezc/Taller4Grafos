@@ -5,7 +5,7 @@
     #include<iostream>
     
     class Coordenada {
-    private:
+    private:n
         double x, y;
     
     public:
