@@ -16,3 +16,8 @@
     bool Coordenada::operator==(const Coordenada& other) const {
         return (x == other.x && y == other.y);
     }
+
+    std::ostream& operator<<(std::ostream& os, const Coordenada& coord) {
+    os << "(" << coord.obtenerX() << ", " << coord.obtenerY() << ")";
+    return os;
+    }

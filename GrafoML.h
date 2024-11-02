@@ -8,6 +8,8 @@
     #include <queue>    
     #include <stack>
     #include <unordered_map>
+    #include <limits>
+    #include <numeric>
     
     template <class T, class U> 
     class GrafoML{
@@ -67,6 +69,9 @@
         void algoritmoDijkstra(T origen); //CHECK
         void mostrarCamino(const std::vector<int>& predecesores, int j); //CHECK
         
+        //PARA TALLER
+        U calcularCostoRecorrido(const std::vector<int>& orden);
+        void encontrarCaminoHamiltonConCostoMinimo();
     };
 
     //Constructor Base
@@ -366,21 +371,16 @@
     template<class T, class U>
     void GrafoML<T,U>::imprimir() {
         /*Se imprime el encabezado del grafo y se comeinza a iterar*/
-        std::cout<<"---- Grafo ----"<<std::endl; 
+        std::cout<<"---- Circuito ----"<<std::endl; 
         for (size_t i=0; i<vertices.size(); ++i) {
             std::cout<<"Vértice "<<vertices[i]<<" tiene aristas a: ";
             
-            /*Se utiliza una confirmación para saber si es el primero y no poner , 
-            //se hace un for each de cada arista y se va poniendo la coma*/
-            bool primero = true; 
+            std::cout<<std::endl;
             for (const auto& arista : aristas[i]) {
-                if (!primero) {
-                    std::cout<<", "; 
-                }
                 /*Se accede al peso y se imrpime, y se cambia la bandera de primera
                 //impresión*/
                 std::cout << vertices[arista.first]<<"(peso: "<<arista.second<<")";
-                primero = false; 
+                std::cout<<std::endl;
             }
             std::cout<<std::endl; 
         }
@@ -747,5 +747,65 @@
 
         /*Se muestran las distancias :D*/
         mostrarDistancias(dist, predecesores, inicioIdx);
+    }
+
+    template <class T, class U>
+    U GrafoML<T,U>::calcularCostoRecorrido(const std::vector<int>& orden) {
+
+        /*Se calcula el costo total sumando el peso de loas aristas*/
+        U costoTotal = 0;
+        for (size_t i = 0; i < orden.size() -1; ++i) {
+            int u = orden[i];
+            int v = orden[i + 1];
+            
+            for (const auto& arista : aristas[u]) {
+                if (arista.first == v) {
+                    costoTotal += arista.second; 
+                    break; 
+                }
+            }
+        }
+        return costoTotal;
+    }
+
+    template <class T, class U>
+    void GrafoML<T,U>::encontrarCaminoHamiltonConCostoMinimo() {
+        /*Se inicializan los vectores y se llena con índices*/
+        std::vector<int> indices(vertices.size());
+        std::iota(indices.begin(), indices.end(), 0);
+
+        /*Se elimina el índice de 0,0*/
+        indices.erase(indices.begin());
+
+        /*Se establece el costo mínimo como el más alto para los int
+        //y se establece un vector para llevar costos de mejor camino*/
+        U costoMinimo = std::numeric_limits<U>::max();
+        std::vector<int> mejorCamino;
+
+        do {
+            /*Se comienza desde 0,0*/
+            std::vector<int> camino = {0};
+            camino.insert(camino.end(), indices.begin(), indices.end());
+            /*Se termina en 0,0*/
+            camino.push_back(0); 
+
+            /*Se calcula el costo actual y si es menor al
+            //recibido se cambia el mejor camino*/
+            U costoActual = calcularCostoRecorrido(camino);
+            if (costoActual < costoMinimo) {
+                costoMinimo = costoActual;
+                mejorCamino = camino;
+            }
+          /*Se realiza la permitación entre todos los caminos posibles mientras
+          //existan, así se combinan todos los caminos posibles y sus posibles
+          //costos, y poco a poco se van reemplazando con el nuevo costo*/
+        } while (std::next_permutation(indices.begin(), indices.end()));
+
+        /*Impresión de resultados*/
+        std::cout<<"Costo mínimo: "<<costoMinimo<<"\nCamino: ";
+        for (const auto& vertice : mejorCamino) {
+            std::cout<<vertices[vertice]<<" ";
+        }
+        std::cout<<std::endl;
     }
     #endif
