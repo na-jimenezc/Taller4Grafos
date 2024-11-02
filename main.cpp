@@ -37,7 +37,7 @@
 
         Coordenada coordenadaInicial(x, y);
 
-        for(int i=0; i<grafos.size(); i++){
+        /*for(int i=0; i<grafos.size(); i++){
             std::cout<<"Dijkstra para circuito: ["<<i+1<<"]"<<std::endl;
             grafos[i].algoritmoDijkstra(coordenadaInicial);
             std::cout<<std::endl;
@@ -49,11 +49,11 @@
             std::cout<<"Hamilton para circuito: ["<<i+1<<"]"<<std::endl;
             grafos[i].encontrarCaminoHamilton(coordenadaInicial);
             std::cout<<std::endl;
-        }
+        }*/
 
         std::cout<<std::endl;
         for(int i=0; i<grafos.size(); i++){
-            std::cout<<"Hamilton con camino más corto para: ["<<i+1<<"]"<<std::endl;
+            std::cout<<"Camino de circuito para: ["<<i+1<<"]"<<std::endl;
             grafos[i].encontrarCaminoHamiltonConCostoMinimo();
             std::cout<<std::endl;
         }
