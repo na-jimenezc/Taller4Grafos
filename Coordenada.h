@@ -1,19 +1,23 @@
-    // Coordenada.h
+#ifndef COORDENADA_H
+#define COORDENADA_H
+
+#include <iostream>
+
+class Coordenada {
+private:
+    double x;
+    double y;
+
+public:
+    Coordenada(double x, double y);
+    double obtenerX(); 
+    double obtenerY(); 
     
-    #ifndef COORDENADA_H
-    #define COORDENADA_H
-    #include<iostream>
-    
-    class Coordenada {
-    private:n
-        double x, y;
-    
-    public:
-        Coordenada(double x_val, double y_val);
-        double obtenerX() const;
-        double obtenerY() const;
-        bool operator==(const Coordenada& other) const;
-        friend std::ostream& operator<<(std::ostream& os, const Coordenada& coord);
-    };
-    
-    #endif
+    // Cambiar a pasar el objeto por valor
+    bool operator==(Coordenada other); 
+};
+
+// Sobrecarga del operador <<
+std::ostream& operator<<(std::ostream& os, Coordenada coord);
+
+#endif // COORDENADA_H
